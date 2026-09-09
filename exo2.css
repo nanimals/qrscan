@@ -1,0 +1,18 @@
+
+      @font-face{
+        font-family: "Exo 2";
+        src: 
+          url("exo2.woff2") format("woff2"),
+          url("exo2italic.woff2") format("woff2");
+        font-style: normal;
+      }
+      p{
+        font-family: "Exo 2";
+      }
+      h1{
+        font-family: "Exo 2";
+        font-style: italic;
+      }
+	  a{
+		font-family: "Exo 2";
+	  }
