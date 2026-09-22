@@ -1,50 +1,16 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <style>
-	@import "exo2.css"
-	</style>
-	<meta charset="UTF-8">
-    <title>Medical Bracelet Scanner</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>   
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">     
-</head>
-<body style="background-color:rgb(134, 178, 228);">
-
-    <h1>PLEASE SCAN THE MEDICAL BRACELET!</h1>
-    
-    <img src="https://cdn.pixabay.com/animation/2022/07/29/03/42/03-42-22-68_512.gif" style="width:68px;height:68px;">
-    <p>scanning, wait </p>
-    <p>After scanning the result page will open in a new tab.</p>
-
-    <!-- Scanner Container -->
-    <div id="scanner" style="width: 300px; margin: auto;"></div>
-
-    <table>
-        <tr>
-            <td>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREgBn5zINlHdb-fY8DQYdKLgVcnJ5gfKFSsIrLRI-1fQ&s=10" height="200" width="200">
-                <p>please scan the bracelet!</p>
-                <p>version string: ver_grp6_3.4.7_mecihc_auth:jharu (yappy)</p>
-                <p>
-                    CREDITS: Yatharth jha class 6 A group 6 has made this part of the project, to see other credits run the html with their work
-                    opensource_resource @ https://unpkg.com/html5-qrcode &lt;powered by scanapp&gt; (scanner utility used in this project) 
-                    (C) COPYRIGHT: GROUP 6 OF THE FUTURE FOUNDATION SCHOOL [CONSISTING OF : Prithvijit, Aarav Choudhury and Yatharth Jha]
-                </p>
-            </td>
-        </tr>
-    </table>
-
-    <script>
-        function onScanSuccess(decodedText) {
-            // Correct syntax to open URL in a new tab
-            window.open(decodedText, '_blank');
-        }
-
-        // Adjusted FPS and qrbox to fit within the 300px container safely
-        const scanner = new Html5QrcodeScanner("scanner", { fps: 10, qrbox: 200 });
-        scanner.render(onScanSuccess);
-    </script>
-
-</body>
+	<head>
+		<style>
+		@import exo2.css
+		</style>
+		<title>Medical Health Passport</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<h1>Welcome to the Student Health Passport Center</h1>
+		<p>What would you like to do?</p>
+		<a href=/qr code scanner.html>Generate Health Passport<a>
+		<br>
+		<a href=/generator.html>Scan Health Passport<a>
+	</body>
 </html>
