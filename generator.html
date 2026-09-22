@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <style>@import exo2.css;</style>
   <title>QR Generator</title>
-  <P>
-    INSTRUCTIONS
-    1. Enter your prescription's url 
-    2. take a screen shot and cut out the QR code 
-    3. Paste the QR CODE in the form you were given
-  </P>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     function makeQR() {
       var url = document.getElementById("link").value;
@@ -25,6 +21,16 @@
 <body>
 
   <h3>Health Passport QR Generator</h3>
+  
+  <P>
+    INSTRUCTIONS
+	<br>
+    1. Enter your prescription's url 
+    <br>
+	2. take a screen shot and cut out the QR code 
+    <br>
+	3. Paste the QR CODE in the form you were given
+  </P>
   
   <input type="text" id="link" placeholder="Enter health website URL...">
   <button onclick="makeQR()">Generate Secure QR</button>
