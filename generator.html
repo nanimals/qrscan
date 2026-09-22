@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Generator</title>
+  <P>
+    INSTRUCTIONS
+    1. Enter your prescription's url 
+    2. take a screen shot and cut out the QR code 
+    3. Paste the QR CODE in the form you were given
+  </P>
+  <script>
+    function makeQR() {
+      var url = document.getElementById("link").value;
+      if (url) {
+        // Reverse the URL string so normal phone cameras can't open it
+        var flippedUrl = url.split('').reverse().join('');
+        
+        // Put the flipped text into the QR code API abomination
+        document.getElementById("qrImg").src = 
+          "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(flippedUrl);
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <h3>Health Passport QR Generator</h3>
+  
+  <input type="text" id="link" placeholder="Enter health website URL...">
+  <button onclick="makeQR()">Generate Secure QR</button>
+
+  <br><br>
+  <img id="qrImg" src="" alt="Your QR Code will appear here">
+
+</body>
+</html>

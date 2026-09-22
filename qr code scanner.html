@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>student health password scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>        
+</head>
+<body style="background-color:rgb(134, 178, 228);">
+
+    <h1>Ｓｃａｎ ａ Ｓｔｕｄｅｎｔ Ｈｅａｌｔｈ Ｐａｓｓｐｏｒｔ!</h1>
+    
+    <img src="https://cdn.pixabay.com/animation/2022/07/29/03/42/03-42-22-68_512.gif" style="width:68px;height:68px;">
+    <p>scanning, wait </p>
+    <p>After scanning the result page will open in a new tab.</p>
+
+    <!-- Scanner Container -->
+    <div id="scanner" style="width: 300px; margin: auto;"></div>
+
+    <table>
+        <tr>
+            <td>
+                <image src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHRmNmJsNGRtY3cxbmRldHQ2NTAyM3pkb2dxeGMzejEzajU5ZjBuNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/taVCVuunNzQjBKTrYn/giphy.webp" hight="50" bredth="50"></image>
+                <p>please scan the passport!</p>
+                <p>version string: ver_grp6_3.4.7_mecihc_auth:jharu (yappy)</p>
+                <p>
+                    CREDITS: Yatharth jha class 6 A group 6 has made this part of the project, to see other credits run the html with their work
+                    opensource_resource @ https://unpkg.com/html5-qrcode &lt;powered by scanapp&gt; (scanner utility used in this project) 
+                    (C) COPYRIGHT: GROUP 6 OF THE FUTURE FOUNDATION SCHOOL [CONSISTING OF : Prithvijit, Arav Choudhury and Yatharth Jha]
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        function unjumbleUrl(text) {
+            // Reverses the string back to its original web address format
+            return text.split('').reverse().join('');
+        }
+
+        function onScanSuccess(decodedText) {
+            // Unjumble the scanned string from the bracelet
+            let realUrl = unjumbleUrl(decodedText);
+
+            // Open the restored URL in a new tab
+            window.open(realUrl, '_blank');
+        }
+
+        // Adjusted FPS and qrbox to fit within the 300px container safely
+        const scanner = new Html5QrcodeScanner("scanner", { fps: 10, qrbox: 200 });
+        scanner.render(onScanSuccess);
+    </script>
+<H3>SUPPORT HELPLINE</H3>
+<h3>~~~~~error! this feature has been disabled by the administrator~~~~~</h3>
+</body>
+</html>
