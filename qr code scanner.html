@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>student health passport scanner</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -11,20 +9,69 @@
         a:visited { color: #c58af9; }
         #scanner { width: 300px; margin: auto; border: 1px solid silver; }
         #result { text-align: center; margin: 12px; }
-        #result button { padding: 8px 14px; font-size: 14px; }
         #error { color: #ff8a80; text-align: center; }
+        
+        #progress-container {
+            display: none;
+            width: 80%;
+            max-width: 300px;
+            margin: 15px auto;
+            text-align: center;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #222;
+            border: 1px solid #444;
+            height: 16px;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #fbff00;
+            transition: width 0.05s linear;
+        }
+        #progress-text {
+            font-size: 12px;
+            color: #fbff00;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+        #decoded-display {
+            background: #111;
+            border: 1px solid #444;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00ff88;
+            display: none;
+        }
     </style>
-    <!-- Load the library from a CDN (pinned version) -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Load html5-qrcode scanner library -->
+    <script src="./student health passport scanner_files/html5-qrcode.min.js.download"></script>
 </head>
 <body>
     <h1>𝚂𝚌𝚊𝚗 𝚊 𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝</h1>
-    <img src="https://cdn.pixabay.com/animation/2023/08/20/21/38/21-38-49-7_512.gif" style="width:68px;height:68px;">
+    <img src="./student health passport scanner_files/21-38-49-7_512.gif" style="width:68px;height:68px;">
 
-    <!-- Must be EMPTY: the library builds the UI inside it -->
-    <div id="scanner"></div>
+    <div id="scanner" style="position: relative; padding: 0px; border: 1px solid silver;"></div>
+    
+    <div id="progress-container">
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="progress-text">DECOMPRESSING GZIP... 0%</div>
+    </div>
+
     <div id="result"></div>
     <div id="error"></div>
+    
+    <div id="decoded-display"></div>
 
     <table>
         <tbody><tr><td>
@@ -37,25 +84,13 @@
         </td></tr></tbody>
     </table>
 
-    <h3>support helpline from ver:1.10</h3>
-    <p><u>This feature is buggy and unstable. To avoid problems, this feature has been disabled by the Administrator.</u></p>
-
     <script>
-        function unjumbleUrl(text) {
-            return text.trim().split('').reverse().join('');
-        }
-
-        function isSafeUrl(str) {
-            try {
-                const u = new URL(str);
-                return u.protocol === 'https:' || u.protocol === 'http:';
-            } catch (e) {
-                return false;
-            }
-        }
-
         const errorBox = document.getElementById('error');
         const resultBox = document.getElementById('result');
+        const progressContainer = document.getElementById('progress-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const decodedDisplay = document.getElementById('decoded-display');
 
         if (typeof Html5QrcodeScanner === 'undefined') {
             errorBox.textContent = 'Scanner library failed to load. Check your internet connection.';
@@ -66,28 +101,66 @@
             let handled = false;
 
             function onScanSuccess(decodedText) {
-                if (handled) return;          // callback fires on every frame
+                if (handled) return;
                 handled = true;
+                scanner.clear().catch(() => {});
 
-                const realUrl = unjumbleUrl(decodedText);
-
-                scanner.clear().catch(() => {}); // stop camera
-
-                if (!isSafeUrl(realUrl)) {
-                    errorBox.textContent = 'Invalid or unsafe QR code.';
-                    return;
-                }
-
-                // Button click = real user gesture, so no popup blocker
-                resultBox.innerHTML = '';
-                const btn = document.createElement('button');
-                btn.textContent = 'Open Health Passport';
-                btn.onclick = () => window.open(realUrl, '_blank', 'noopener');
-                resultBox.appendChild(btn);
+                processDecompression(decodedText.trim());
             }
 
-            scanner.render(onScanSuccess, () => { /* ignore per-frame "no QR found" errors */ });
+            scanner.render(onScanSuccess, () => {});
+        }
+
+        async function processDecompression(rawText) {
+            progressContainer.style.display = 'block';
+            errorBox.textContent = '';
+
+            try {
+                progressFill.style.width = "30%";
+                progressText.textContent = "PARKING PAYLOAD... 30%";
+                await new Promise(r => setTimeout(r, 100));
+
+                if (!rawText.startsWith("GZIP:")) {
+                    throw new Error("Invalid format signature.");
+                }
+
+                const payload = rawText.substring(5);
+                
+                // 1. Un-reverse
+                const unjumbled = payload.split('').reverse().join('');
+
+                progressFill.style.width = "60%";
+                progressText.textContent = "DECODING BASE64... 60%";
+                await new Promise(r => setTimeout(r, 100));
+
+                // 2. Decode Base64 to binary
+                const binaryString = atob(unjumbled);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                progressFill.style.width = "85%";
+                progressText.textContent = "DECOMPRESSING GZIP... 85%";
+                await new Promise(r => setTimeout(r, 100));
+
+                // 3. Native DecompressionStream
+                const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+                const decompressedResponse = await new Response(stream).text();
+
+                progressFill.style.width = "100%";
+                progressText.textContent = "DECOMPRESSION COMPLETE ✓";
+                progressFill.style.backgroundColor = '#00ff88';
+
+                decodedDisplay.style.display = 'block';
+                decodedDisplay.textContent = decompressedResponse;
+
+            } catch (err) {
+                progressText.textContent = "DECOMPRESSION FAILED ✗";
+                progressFill.style.backgroundColor = '#ff5555';
+                errorBox.textContent = 'Could not decompress GZIP payload: ' + err.message;
+            }
         }
     </script>
-</body>
-</html>
+</body></html>
