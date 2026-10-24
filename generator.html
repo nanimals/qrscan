@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>QR Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health passport EQR generator</title>
   <style>
     body {
       background-color: #000000;
@@ -13,71 +13,193 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin: 0;
     }
+
     .window {
       background: #615353;
       border: 2px solid #333333;
       padding: 20px;
       width: 100%;
       max-width: 450px;
+      box-sizing: border-box;
+      color: #ffffff;
     }
-    textarea, button {
+
+    .input-label {
+      font-size: 12px;
+      color: #fbff00;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input[type="text"], input[type="tel"], textarea, button {
       display: block;
       width: 100%;
-      margin: 10px 0;
+      margin: 6px 0 12px 0;
       padding: 10px;
-      background: #222;
-      border: 1px solid #444;
+      background: #222222;
+      border: 1px solid #444444;
       color: #ffffff;
       font-family: monospace;
       box-sizing: border-box;
       resize: vertical;
     }
+
     button {
       background: #fbff00;
-      color: #000;
+      color: #000000;
       font-weight: bold;
       cursor: pointer;
+      border: none;
+      margin-top: 15px;
     }
+
     button:hover {
       background: #e5ff00;
     }
-    #qrContainer {
-      margin-top: 15px;
-      text-align: center;
-      display: none;
-    }
-    img {
-      margin-top: 10px;
-      border: 4px solid #fff;
-    }
+
     #progress-container {
       display: none;
       width: 100%;
       margin-top: 10px;
     }
+
     #progress-bar {
       width: 100%;
-      background: #222;
-      border: 1px solid #444;
+      background: #222222;
+      border: 1px solid #444444;
       height: 14px;
       box-sizing: border-box;
     }
+
     #progress-fill {
       width: 0%;
       height: 100%;
       background: #fbff00;
       transition: width 0.05s linear;
     }
+
     #progress-text {
       font-size: 11px;
       color: #fbff00;
       margin-top: 4px;
     }
+
+    /* CARD PREVIEW OUTPUT */
+    #outputSection {
+      display: none;
+      margin-top: 30px;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* EXACT 1/4 A4 CARD SIZE (~105mm x 148mm) */
+    .passport-card {
+      width: 105mm;
+      height: 148mm;
+      background-color: #cbd5e1;
+      border-radius: 24px;
+      padding: 16mm 10mm 14mm 10mm;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #000000;
+      font-family: sans-serif;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 0 0 14px 0;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    .qr-box {
+      width: 65mm;
+      height: 65mm;
+      background: #ffffff;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .qr-box img {
+      width: 88%;
+      height: 88%;
+      object-fit: contain;
+    }
+
+    .card-fields {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .field-label {
+      font-size: 14px;
+      color: #000000;
+      white-space: nowrap;
+    }
+
+    .field-line {
+      flex: 1;
+      border-bottom: 1.5px solid #000000;
+      font-weight: bold;
+      font-size: 14px;
+      padding-left: 6px;
+      padding-bottom: 1px;
+      min-height: 18px;
+    }
+
+    .btn-print {
+      margin-top: 15px;
+      width: 105mm;
+    }
+
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .no-print, .window {
+        display: none !important;
+      }
+      #outputSection {
+        display: flex !important;
+        margin: 0;
+      }
+      .passport-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+      }
+    }
   </style>
   <script>
     async function generateCompressedQR() {
+      var nameVal = document.getElementById("studentName").value.trim();
+      var classVal = document.getElementById("studentClass").value.trim();
+      var phoneVal = document.getElementById("studentPhone").value.trim();
       var textData = document.getElementById("link").value.trim();
+
       if (!textData) {
         alert("Please enter the student's health paragraph!");
         return;
@@ -91,17 +213,17 @@
       try {
         progressFill.style.width = "20%";
         progressText.textContent = "ENCODING DATA... 20%";
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 80));
 
-        // 1. Native GZIP Compression Stream (NASA-level web compression)
+        // GZIP compression
         const stream = new Blob([textData]).stream().pipeThrough(new CompressionStream('gzip'));
         const compressedBuffer = await new Response(stream).arrayBuffer();
-        
+
         progressFill.style.width = "60%";
         progressText.textContent = "COMPRESSING (GZIP)... 60%";
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 80));
 
-        // 2. Convert to Base64
+        // Base64 string conversion
         let binaryString = '';
         const bytes = new Uint8Array(compressedBuffer);
         const len = bytes.byteLength;
@@ -112,20 +234,25 @@
 
         progressFill.style.width = "85%";
         progressText.textContent = "REVERSING PAYLOAD... 85%";
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 80));
 
-        // 3. Reverse string so cameras don't open it directly
+        // Reverse payload for safety stream
         const flipped = base64Compressed.split('').reverse().join('');
         const finalPayload = "GZIP:" + flipped;
 
-        // 4. Generate QR
+        // Generate QR code API
         var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(finalPayload);
-        
+
         progressFill.style.width = "100%";
         progressText.textContent = "DONE ✓";
 
+        // Populate card
+        document.getElementById("cardName").textContent = nameVal;
+        document.getElementById("cardClass").textContent = classVal;
+        document.getElementById("cardPhone").textContent = phoneVal;
         document.getElementById("qrImg").src = qrUrl;
-        document.getElementById("qrContainer").style.display = "block";
+
+        document.getElementById("outputSection").style.display = "flex";
       } catch (err) {
         progressText.textContent = "COMPRESSION FAILED ✗";
         alert("Error: " + err.message);
@@ -135,32 +262,67 @@
 </head>
 <body>
 
-  <div class="window">
-    <h3>𝙷𝚎𝚊𝚕𝚝𝚑 𝚙𝚊𝚜𝚜𝚙𝚘𝚛𝚝 𝙴𝚀𝚁 𝚐𝚎𝚗𝚎𝚛𝚊𝚝𝚘𝚛</h3>
-    
-    <style>color: #fff; font-size: 13px;</style>
-     <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" style="width:100px;height:100px;">
-    <p>codename: miku64</p>
+  <div class="window no-print">
+    <h3 style="margin-top:0;">𝙷𝚎𝚊𝚕𝚝𝚑 𝚙𝚊𝚜𝚜𝚙𝚘𝚛𝚝 𝙴𝚀𝚁 𝚐𝚎𝚗𝚎𝚛𝚊𝚝𝚘𝚛</h3>
 
-       Instructions
-<br>
-1️⃣. Enter student's full health paragraph below<br>
-2️⃣. Generate and take a screenshot of the compact QR code<br>
-3️⃣. Paste or scan it into your reader page
-    </p>
-    
-    <textarea id="link" rows="5" placeholder="Enter student health paragraph..."></textarea>
-    <button onclick="generateCompressedQR()">✓ SUBMIT & COMPRESS</button>
+    <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" style="width:100px;height:100px;" alt="Miku">
+    <p style="color: #fff; font-size: 13px; margin: 4px 0 12px 0;">codename: miku64</p>
+
+    <div style="font-size: 11px; margin-bottom: 12px; line-height: 1.4; color: #fff;">
+      Instructions<br>
+      1️⃣. Enter student details & health paragraph<br>
+      2️⃣. Click Submit to encode & generate passport<br>
+      3️⃣. Print your 1/4 A4 size card
+    </div>
+
+    <span class="input-label">Student Name:</span>
+    <input type="text" id="studentName" placeholder="Enter name...">
+
+    <span class="input-label">Class and Section:</span>
+    <input type="text" id="studentClass" placeholder="e.g. 10-A">
+
+    <span class="input-label">Telephone Number:</span>
+    <input type="tel" id="studentPhone" placeholder="e.g. +1 555-0192">
+
+    <span class="input-label">Health Paragraph:</span>
+    <textarea id="link" rows="4" placeholder="Enter health paragraph..."></textarea>
+
+    <button onclick="generateCompressedQR()">✓ SUBMIT &amp; COMPRESS</button>
 
     <div id="progress-container">
       <div id="progress-bar"><div id="progress-fill"></div></div>
       <div id="progress-text">READY</div>
     </div>
+  </div>
 
-    <div id="qrContainer">
-      <p style="font-size: 12px; color: #00ff88;">Compressed QR Generated!</p>
-      <img id="qrImg" alt="Your QR Code will appear here">
+  <!-- Output 1/4 A4 Passport Card -->
+  <div id="outputSection">
+    <div class="passport-card">
+      <h2 class="card-title">Health passport</h2>
+
+      <div class="qr-box">
+        <img id="qrImg" src="" alt="Compressed EQR Code">
+      </div>
+
+      <div class="card-fields">
+        <div class="field-row">
+          <span class="field-label">name:</span>
+          <div class="field-line" id="cardName"></div>
+        </div>
+
+        <div class="field-row">
+          <span class="field-label">class and section</span>
+          <div class="field-line" id="cardClass"></div>
+        </div>
+
+        <div class="field-row">
+          <span class="field-label">telephone number</span>
+          <div class="field-line" id="cardPhone"></div>
+        </div>
+      </div>
     </div>
+
+    <button class="btn-print no-print" onclick="window.print()">🖨️ PRINT 1/4 A4 CARD</button>
   </div>
 
 </body>
