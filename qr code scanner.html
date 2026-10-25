@@ -167,13 +167,63 @@
             font-family: monospace;
             cursor: pointer;
         }
+
+        /* ===== dynamic wallpaper + animations (added) ===== */
+        #nebula{position:fixed;inset:0;z-index:-3;width:100%;height:100%}
+        #slides{position:fixed;inset:0;z-index:-2;overflow:hidden}
+        #slides img{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;opacity:0;transition:opacity 2.5s}
+        #slides img.on{opacity:1;animation:kenburns 28s ease-in-out infinite alternate}
+        @keyframes kenburns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.12) translate(-2.5%,2%)}}
+        #shade{position:fixed;inset:0;z-index:-1;background:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.35) 40%,rgba(0,0,0,.7));pointer-events:none}
+        #floaters{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+        #floaters span{position:absolute;white-space:nowrap;font-weight:700;font-family:monospace;color:rgba(255,255,255,.1);text-shadow:0 0 18px rgba(251,255,0,.25);
+          left:var(--x);top:var(--y);font-size:var(--s,26px);animation:sway var(--d,14s) ease-in-out infinite alternate,drift var(--t,60s) linear infinite}
+        #floaters span.y{color:rgba(251,255,0,.12)}#floaters span.big{font-size:64px;color:rgba(255,138,61,.09)}
+        @keyframes sway{0%{transform:rotate(-4deg) translateY(0)}100%{transform:rotate(4deg) translateY(-26px)}}
+        @keyframes drift{0%{margin-left:0}100%{margin-left:-120px}}
+        #wallbtn{position:fixed;right:12px;bottom:12px;z-index:50;font-family:monospace;font-size:12px;padding:6px 10px;background:rgba(0,0,0,.6);color:#fbff00;border:1px solid #fbff00;cursor:pointer;width:auto;margin:0;display:inline-block}
+        #wallbtn:hover{background:#fbff00;color:#000}
+        .miku-bob{animation:bob 3s ease-in-out infinite}
+        @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+        .glitch{position:relative;display:inline-block}
+        .glitch::before,.glitch::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;overflow:hidden;clip-path:inset(0 0 0 0)}
+        .glitch::before{color:#0ff;animation:gl1 4s infinite linear alternate-reverse;left:1px}
+        .glitch::after{color:#f0f;animation:gl2 5s infinite linear alternate-reverse;left:-1px}
+        @keyframes gl1{0%,90%,100%{clip-path:inset(0 0 100% 0);opacity:0}92%{clip-path:inset(20% 0 60% 0);opacity:.8}96%{clip-path:inset(70% 0 5% 0);opacity:.8}}
+        @keyframes gl2{0%,88%,100%{clip-path:inset(0 0 100% 0);opacity:0}90%{clip-path:inset(50% 0 30% 0);opacity:.8}95%{clip-path:inset(10% 0 80% 0);opacity:.8}}
+        .rise{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+        @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+        .pulse{animation:pulse 2.2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(251,255,0,.55)}60%{box-shadow:0 0 0 12px rgba(251,255,0,0)}}
+        @media (prefers-reduced-motion:reduce){#floaters span,#slides img.on,.miku-bob,.glitch::before,.glitch::after,.pulse{animation:none}}
+
+        body{background:transparent}
+        #scanner-area>div:first-child{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+        #scanner-wrapper{animation:rise .7s .15s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 10px 40px rgba(0,0,0,.6);background:rgba(17,17,17,.85);backdrop-filter:blur(6px)}
+        #scanner-wrapper::after{content:"";position:absolute;inset:0;pointer-events:none;border:2px solid transparent;
+            background:linear-gradient(90deg,#fbff00,transparent 30%,transparent 70%,#fbff00) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spinborder 3s linear infinite;opacity:.6}
+        @keyframes spinborder{to{filter:hue-rotate(360deg)}}
+        .info-footer{animation:rise .7s .3s cubic-bezier(.2,.8,.2,1) both;background:rgba(0,0,0,.45);padding:12px 14px;border-left:3px solid #fbff00;backdrop-filter:blur(4px)}
+        .buggy-warning{animation:blink 1.6s steps(2) infinite}
+        @keyframes blink{50%{opacity:.35}}
+        h1{text-shadow:0 0 18px rgba(251,255,0,.35)}
+        h1 .cursor{display:inline-block;width:.5em;animation:caret 1s steps(2) infinite}
+        @keyframes caret{50%{opacity:0}}
+        #resultContainer{animation:dropin .5s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 0 40px rgba(251,255,0,.35);background:rgba(34,34,34,.95);backdrop-filter:blur(8px)}
+        @keyframes dropin{from{opacity:0;transform:translateY(-30px) scale(.95)}to{opacity:1;transform:none}}
+        .data-row{animation:rise .4s both}
+        .data-row:nth-child(2){animation-delay:.05s}.data-row:nth-child(3){animation-delay:.1s}.data-row:nth-child(4){animation-delay:.15s}.data-row:nth-child(5){animation-delay:.2s}.data-row:nth-child(6){animation-delay:.25s}.data-row:nth-child(7){animation-delay:.3s}.data-row:nth-child(8){animation-delay:.35s}.data-row:nth-child(9){animation-delay:.4s}
+        #scanner-wrapper.qr-detected::before{content:"";position:absolute;inset:0;background:#fbff00;opacity:0;animation:flash .5s ease-out;z-index:11;pointer-events:none}
+        @keyframes flash{0%{opacity:.9}100%{opacity:0}}
+        @media (max-width:720px){#scanner-area{grid-template-columns:1fr}#scanner-wrapper{grid-column:1}}
+        @media (prefers-reduced-motion:reduce){#scanner-area>div,#scanner-wrapper,.info-footer,.buggy-warning,#resultContainer,.data-row,h1 .cursor{animation:none}}
     </style>
 </head>
 <body>
 
     <div id="scanner-area">
         <div style="grid-column: 1;">
-            <h1>𝚂𝚌𝚊𝚗 𝚊 𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝</h1>
+            <h1><span id="typed"></span><span class="cursor">▌</span></h1>
             
             <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" class="miku-gif" alt="Miku Ohayou">
             
@@ -331,6 +381,64 @@
         }
 
         window.addEventListener('load', initScanner);
+    </script>
+
+  <!-- ===== dynamic wallpaper + animations (added) ===== -->
+  <canvas id="nebula" aria-hidden="true"></canvas>
+  <div id="slides" aria-hidden="true"></div>
+  <div id="shade" aria-hidden="true"></div>
+  <div id="floaters" aria-hidden="true"></div>
+  <button id="wallbtn" class="no-print" type="button" title="Add wallpaper photos (saved in this browser)">+ wallpaper</button>
+  <input type="file" id="wallfile" accept="image/*" multiple style="display:none">
+  <script>
+  (function(){
+    var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* swaying words */
+    var words=['𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝','codename: miku64','ver_grp10.2.7','GROUP 6','GZIP:','yappy','The Future Foundation School','mecihc_auth:jharu','EQR','miku64','class 6 A','html5-qrcode','FLIPPING ENCRYPTION... 80%','PACKING DATA... 20%'];
+    var f=document.getElementById('floaters');
+    for(var i=0;i<14;i++){var s=document.createElement('span');s.textContent=words[i%words.length];
+      if(i%5===0)s.className='big';else if(i%3===0)s.className='y';
+      s.style.setProperty('--x',Math.random()*95+'%');s.style.setProperty('--y',Math.random()*95+'%');
+      s.style.setProperty('--d',(9+Math.random()*12)+'s');s.style.setProperty('--t',(40+Math.random()*60)+'s');
+      s.style.setProperty('--s',(16+Math.random()*22)+'px');s.style.animationDelay=(-Math.random()*20)+'s';f.appendChild(s);}
+    /* nebula canvas */
+    var c=document.getElementById('nebula'),x=c.getContext('2d'),w,h,blobs=[],stars=[];
+    var cols=['255,138,61','251,255,0','70,214,209','40,120,200','255,90,60','120,230,200'];
+    function size(){var dpr=Math.min(devicePixelRatio||1,2);w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr;blobs=[];stars=[];
+      for(var i=0;i<30;i++)blobs.push({x:Math.random()*w,y:Math.random()*h,r:(0.12+Math.random()*0.3)*Math.max(w,h),c:cols[i%cols.length],a:.05+Math.random()*.11,vx:(Math.random()-.5)*.25*dpr,vy:(Math.random()-.5)*.2*dpr,p:Math.random()*6.28,ps:.002+Math.random()*.004});
+      for(var j=0;j<220;j++)stars.push({x:Math.random()*w,y:Math.random()*h,r:(.4+Math.random()*1.6)*dpr,p:Math.random()*6.28,s:.01+Math.random()*.03});}
+    size();addEventListener('resize',size);
+    function draw(){x.globalCompositeOperation='source-over';x.fillStyle='#05080f';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';
+      for(var i=0;i<blobs.length;i++){var b=blobs[i];b.p+=b.ps;var r=b.r*(1+Math.sin(b.p)*.08);var g=x.createRadialGradient(b.x,b.y,0,b.x,b.y,r);
+        g.addColorStop(0,'rgba('+b.c+','+b.a+')');g.addColorStop(.5,'rgba('+b.c+','+(b.a*.45)+')');g.addColorStop(1,'rgba('+b.c+',0)');
+        x.fillStyle=g;x.beginPath();x.arc(b.x,b.y,r,0,6.283);x.fill();
+        if(!reduce){b.x+=b.vx;b.y+=b.vy;if(b.x<-r)b.x=w+r;if(b.x>w+r)b.x=-r;if(b.y<-r)b.y=h+r;if(b.y>h+r)b.y=-r;}}
+      for(var k=0;k<stars.length;k++){var st=stars[k];st.p+=st.s;x.fillStyle='rgba(255,255,255,'+((.5+Math.sin(st.p)*.5)*.9)+')';x.beginPath();x.arc(st.x,st.y,st.r,0,6.283);x.fill();}
+      if(!reduce)requestAnimationFrame(draw);}
+    draw();
+    /* photo slideshow: bg1.jpg..bg8.jpg next to this file + photos saved in the browser */
+    var box=document.getElementById('slides'),urls=[],idx=0,timer=0,db=null;
+    try{var rq=indexedDB.open('miku_wallpapers',1);rq.onupgradeneeded=function(e){e.target.result.createObjectStore('bgs',{keyPath:'id',autoIncrement:true});};
+      rq.onsuccess=function(e){db=e.target.result;load();};rq.onerror=function(){load();};}catch(e){load();}
+    function saved(cb){if(!db)return cb([]);var r=db.transaction('bgs').objectStore('bgs').getAll();r.onsuccess=function(){cb(r.result||[])};r.onerror=function(){cb([])};}
+    function show(){var ims=box.querySelectorAll('img');for(var i=0;i<ims.length;i++)ims[i].className=i===idx?'on':'';idx=(idx+1)%urls.length;}
+    function load(){saved(function(list){urls=list.map(function(b){return URL.createObjectURL(b.blob)});var left=8;
+      for(var n=1;n<=8;n++)(function(n){var im=new Image();im.onload=function(){urls.push('bg'+n+'.jpg');done()};im.onerror=done;im.src='bg'+n+'.jpg';})(n);
+      function done(){if(--left)return;box.innerHTML='';urls.forEach(function(u){var im=document.createElement('img');im.src=u;im.alt='';box.appendChild(im);});
+        clearInterval(timer);idx=0;if(urls.length){show();timer=setInterval(show,16000);}}});}
+    document.getElementById('wallbtn').onclick=function(){document.getElementById('wallfile').click();};
+    document.getElementById('wallfile').onchange=function(e){if(!db){alert('This browser blocks storage; put bg1.jpg next to the file instead.');return;}
+      var files=[].slice.call(e.target.files),tx=db.transaction('bgs','readwrite'),st=tx.objectStore('bgs');files.forEach(function(fl){st.put({name:fl.name,blob:fl,added:Date.now()})});tx.oncomplete=function(){load();};e.target.value='';};
+    /* small touches */
+    document.querySelectorAll('img[alt="Miku"],img[alt="Miku Ohayou"]').forEach(function(im){im.classList.add('miku-bob')});
+    document.querySelectorAll('.codename, .window p').forEach(function(el){if(/miku64/i.test(el.textContent)){el.classList.add('glitch');el.setAttribute('data-t',el.textContent.trim());}});
+  })();
+  </script>
+
+    <script>
+    (function(){var t='𝚂𝚌𝚊𝚗 𝚊 𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝',el=document.getElementById('typed'),chars=Array.from(t),i=0;
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=t;return;}
+      (function step(){el.textContent=chars.slice(0,++i).join('');if(i<chars.length)setTimeout(step,55);})();})();
     </script>
 </body>
 </html>
