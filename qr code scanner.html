@@ -1,175 +1,336 @@
 <!DOCTYPE html>
-<!-- saved from url=(0058)https://nanimals.github.io/qrscan/qr%20code%20scanner.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
-    <title>student health passport scanner</title>
+<html>
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student health passport scanner</title>
     <style>
-        @import url("exo2.css");
-        body { background-color: #000; color: #fff; font-family: 'Exo 2', sans-serif; }
-        a { color: #8ab4f8; }
-        a:visited { color: #c58af9; }
-        #scanner { width: 300px; margin: auto; border: 1px solid silver; }
-        #result { text-align: center; margin: 12px; }
-        #result button { padding: 8px 14px; font-size: 14px; }
-        #error { color: #ff8a80; text-align: center; }
+        body {
+            background-color: black;
+            color: white;
+            font-family: serif;
+            margin: 0;
+            padding: 20px;
+        }
 
-        /* Progress bar styling */
-        #progress-container {
-            display: none;
-            width: 80%;
-            max-width: 300px;
-            margin: 15px auto;
-            text-align: center;
+        h1 {
+            font-size: 32px;
+            font-style: italic;
+            margin-top: 0;
+            margin-bottom: 20px;
         }
-        #progress-bar {
+
+        .miku-gif {
+            width: 80px;
+            height: auto;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .codename {
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        #scanner-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 30px;
+        }
+
+        #scanner-wrapper {
+            position: relative;
+            grid-column: 2;
             width: 100%;
-            background-color: #222;
-            border: 1px solid #444;
-            height: 16px;
-            padding: 2px;
+            max-width: 450px;
+            overflow: hidden;
+            border: 2px solid #444;
+            background-color: #111;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+        }
+
+        #scanner-wrapper.qr-detected {
+            transform: scale(1.08);
+            border-color: #fbff00;
+            box-shadow: 0 0 25px rgba(251, 255, 0, 0.6);
+        }
+
+        #reader {
+            width: 100%;
+            background-color: #111;
             box-sizing: border-box;
         }
-        #progress-fill {
-            width: 0%;
-            height: 100%;
-            background-color: #fbff00;
-            transition: width 0.05s linear;
+
+        .laser-bar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff0033 20%, #ff3366 50%, #ff0033 80%, transparent);
+            box-shadow: 0 0 12px #ff0033, 0 0 4px #ffffff;
+            z-index: 10;
+            pointer-events: none;
+            top: 0%;
+            animation: scanLaser 2s ease-in-out infinite alternate;
         }
-        #progress-text {
-            font-size: 12px;
-            color: #fbff00;
-            margin-top: 5px;
-            font-family: monospace;
+
+        @keyframes scanLaser {
+            0% { top: 5%; }
+            100% { top: 92%; }
         }
-        /* Fixed scaling and wrapping for decoded output */
-        #decoded-display {
-            background: #111;
-            border: 1px solid #444;
-            padding: 15px;
-            margin: 15px auto;
-            width: 85%;
-            max-width: 500px;
-            box-sizing: border-box;
-            white-space: pre-wrap;
-            word-break: break-word;
-            overflow-x: auto;
+
+        #reader button, #reader select {
+            background: #fbff00;
+            color: #000;
+            border: none;
+            padding: 8px 12px;
             font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        #reader input[type="file"] {
+            color: white;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+
+        .info-footer {
+            font-family: sans-serif;
             font-size: 13px;
-            color: #00ff88;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .buggy-warning {
+            color: #ff3333;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #resultContainer {
             display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: calc(100% - 40px);
+            max-width: 450px;
+            background: #222;
+            border: 2px solid #fbff00;
+            padding: 15px;
+            box-sizing: border-box;
+            font-family: monospace;
+            z-index: 1000;
+        }
+
+        .result-title {
+            color: #fbff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 6px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+
+        .data-label {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .data-val {
+            color: #ffffff;
+            text-align: right;
+        }
+
+        .close-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fbff00;
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            font-family: monospace;
+            cursor: pointer;
         }
     </style>
-    <!-- Load html5-qrcode scanner library from public CDN -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-    <h1>𝚂𝚌𝚊𝚗 𝚊 𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝</h1>
-    <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" style="width:100px;height:100px;">
-    <p>codename: miku64</p>
 
-    <!-- Must be EMPTY: the library builds the UI inside it -->
-    <div id="scanner" style="position: relative; padding: 0px; border: 1px solid silver;"></div>
-    
-    <!-- Progress bar for GZIP decompression -->
-    <div id="progress-container">
-        <div id="progress-bar"><div id="progress-fill"></div></div>
-        <div id="progress-text">DECOMPRESSING GZIP... 0%</div>
+    <div id="scanner-area">
+        <div style="grid-column: 1;">
+            <h1>𝚌𝚊𝚗 𝚊 𝚂𝚝𝚞𝚍𝚎𝚗𝚝 𝙷𝚎𝚊𝚕𝚝𝚑 𝙿𝚊𝚜𝚜𝚙𝚘𝚛𝚝</h1>
+            
+            <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" class="miku-gif" alt="Miku Ohayou">
+            
+            <div class="codename">codename: miku64</div>
+        </div>
+
+        <div id="scanner-wrapper">
+            <div class="laser-bar" id="laser"></div>
+            <div id="reader"></div>
+        </div>
     </div>
 
-    <div id="result"></div>
-    <div id="error"></div>
-    
-    <!-- Container to display the decompressed health paragraph -->
-    <div id="decoded-display"></div>
+    <div class="info-footer">
+        <div>version string: ver_grp10.2.7_mecihc_auth:jharu (yappy)</div>
+        <div>𝙲𝚁𝙴𝙳𝙸𝚃𝚂: 𝚈𝚊𝚝𝚑𝚊𝚛𝚝𝚑 𝚓𝚑𝚊 𝚌𝚕𝚊𝚜𝚜 𝟼 𝙰 𝚐𝚛𝚘𝚞𝚙 𝟼 𝚑𝚊𝚜 𝚖𝚊𝚍𝚎 𝚝𝚑𝚒𝚜 𝚙𝚊𝚛𝚝 𝚘𝚏 𝚝𝚑𝚎 𝚙𝚛𝚘𝚓𝚎𝚌𝚝. Scanner utility: <a href="https://github.com/mebjas/html5-qrcode" style="color: white;">html5-qrcode</a> (C) COPYRIGHT: GROUP 6 OF THE FUTURE FOUNDATION SCHOOL [Prithvijit, Aarav Choudhury and Yatharth Jha]</div>
+        <br>
+        <strong>support helpline from ver:1.10</strong>
+        <div class="buggy-warning">This feature is buggy and unstable. To avoid problems, this feature has been disabled by the Administrator.</div>
+    </div>
 
-    <table>
-        <tbody><tr><td>
-            <p>version string: ver_grp10.2.7_mecihc_auth:jharu (yappy)</p>
-            <p>
-                𝙲𝚁𝙴𝙳𝙸𝚃𝚂: 𝚈𝚊𝚝𝚑𝚊𝚛𝚝𝚑 𝚓𝚑𝚊 𝚌𝚕𝚊𝚜𝚜 𝟼 𝙰 𝚐𝚛𝚘𝚞𝚙 𝟼 𝚑𝚊𝚜 𝚖𝚊𝚍𝚎 𝚝𝚑𝚒𝚜 𝚙𝚊𝚛𝚝 𝚘𝚏 𝚝𝚑𝚎 𝚙𝚛𝚘𝚓𝚎𝚌𝚝.
-                Scanner utility: <a href="https://unpkg.com/html5-qrcode" target="_blank">html5-qrcode</a>
-                (C) COPYRIGHT: GROUP 6 OF THE FUTURE FOUNDATION SCHOOL [Prithvijit, Aarav Choudhury and Yatharth Jha]
-            </p>
-        </td></tr></tbody>
-    </table>
+    <div id="resultContainer">
+        <div class="result-title">STUDENT HEALTH RECORD</div>
+        
+        <div class="data-row"><span class="data-label">Name:</span><span class="data-val" id="resName">-</span></div>
+        <div class="data-row"><span class="data-label">Class & Sec:</span><span class="data-val" id="resClass">-</span></div>
+        <div class="data-row"><span class="data-label">Gender:</span><span class="data-val" id="resGender">-</span></div>
+        <div class="data-row"><span class="data-label">Blood Group:</span><span class="data-val" id="resBlood">-</span></div>
+        <div class="data-row"><span class="data-label">Phone:</span><span class="data-val" id="resPhone">-</span></div>
+        <div class="data-row"><span class="data-label">Ailments:</span><span class="data-val" id="resAilments">-</span></div>
+        <div class="data-row"><span class="data-label">Allergies:</span><span class="data-val" id="resAllergies">-</span></div>
+        <div class="data-row"><span class="data-label">Medication:</span><span class="data-val" id="resMedication">-</span></div>
 
-    <h3>support helpline from ver:1.10</h3>
-    <p><u>This feature is buggy and unstable. To avoid problems, this feature has been disabled by the Administrator.</u></p>
+        <button class="close-btn" onclick="closeReport()">SCAN ANOTHER</button>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script>
-        const errorBox = document.getElementById('error');
-        const resultBox = document.getElementById('result');
-        const progressContainer = document.getElementById('progress-container');
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-        const decodedDisplay = document.getElementById('decoded-display');
+        let scanner = null;
 
-        if (typeof Html5QrcodeScanner === 'undefined') {
-            errorBox.textContent = 'Scanner library failed to load. Check your internet connection.';
-        } else if (!window.isSecureContext) {
-            errorBox.textContent = 'Camera needs HTTPS or localhost. Open this page from a local server.';
-        } else {
-            const scanner = new Html5QrcodeScanner('scanner', { fps: 10, qrbox: 200 }, false);
-            let handled = false;
+        function playScanBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
 
-            function onScanSuccess(decodedText) {
-                if (handled) return;
-                handled = true;
-                scanner.clear().catch(() => {});
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
 
-                processDecompression(decodedText.trim());
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                console.log("Audio skipped");
             }
-
-            scanner.render(onScanSuccess, () => {});
         }
 
-        async function processDecompression(rawText) {
-            progressContainer.style.display = 'block';
-            errorBox.textContent = '';
+        function onScanSuccess(decodedText, decodedResult) {
+            playScanBeep();
 
+            const wrapper = document.getElementById("scanner-wrapper");
+            const laser = document.getElementById("laser");
+            
+            if(laser) laser.style.display = "none";
+            if(wrapper) wrapper.classList.add("qr-detected");
+
+            setTimeout(() => {
+                if (scanner) {
+                    scanner.clear().then(() => {
+                        parsePayload(decodedText);
+                    }).catch(error => {
+                        parsePayload(decodedText);
+                    });
+                } else {
+                    parsePayload(decodedText);
+                }
+            }, 400);
+        }
+
+        function onScanFailure(error) {
+            // ignore scan misses
+        }
+
+        async function parsePayload(payload) {
             try {
-                progressFill.style.width = "30%";
-                progressText.textContent = "PARSING PAYLOAD... 30%";
-                await new Promise(r => setTimeout(r, 100));
-
-                if (!rawText.startsWith("GZIP:")) {
-                    throw new Error("Invalid format signature.");
+                if (!payload.startsWith("GZIP:")) {
+                    throw new Error("Invalid Health Passport EQR code format!");
                 }
 
-                const payload = rawText.substring(5);
-                const unjumbled = payload.split('').reverse().join('');
+                const flipped = payload.substring(5);
+                const base64Compressed = flipped.split('').reverse().join('');
 
-                progressFill.style.width = "60%";
-                progressText.textContent = "DECODING BASE64... 60%";
-                await new Promise(r => setTimeout(r, 100));
-
-                const binaryString = atob(unjumbled);
+                const binaryString = atob(base64Compressed);
                 const len = binaryString.length;
                 const bytes = new Uint8Array(len);
                 for (let i = 0; i < len; i++) {
                     bytes[i] = binaryString.charCodeAt(i);
                 }
 
-                progressFill.style.width = "85%";
-                progressText.textContent = "DECOMPRESSING GZIP... 85%";
-                await new Promise(r => setTimeout(r, 100));
-
                 const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-                const decompressedResponse = await new Response(stream).text();
+                const decompressedBuffer = await new Response(stream).arrayBuffer();
+                const rawString = new TextDecoder().decode(decompressedBuffer);
 
-                progressFill.style.width = "100%";
-                progressText.textContent = "DECOMPRESSION COMPLETE ✓";
-                progressFill.style.backgroundColor = '#00ff88';
+                const parts = rawString.split('|');
+                if (parts.length < 9) {
+                    throw new Error("Corrupted or incomplete data payload!");
+                }
 
-                decodedDisplay.style.display = 'block';
-                decodedDisplay.textContent = decompressedResponse;
+                document.getElementById("resName").textContent = parts[0];
+                document.getElementById("resClass").textContent = parts[1] + " - " + parts[2];
+                document.getElementById("resGender").textContent = parts[3];
+                document.getElementById("resBlood").textContent = parts[4];
+                document.getElementById("resPhone").textContent = parts[5];
+                document.getElementById("resAilments").textContent = parts[6];
+                document.getElementById("resAllergies").textContent = parts[7];
+                document.getElementById("resMedication").textContent = parts[8];
 
+                document.getElementById("resultContainer").style.display = "block";
             } catch (err) {
-                progressText.textContent = "DECOMPRESSION FAILED ✗";
-                progressFill.style.backgroundColor = '#ff5555';
-                errorBox.textContent = 'Could not decompress GZIP payload: ' + err.message;
+                alert("Failed to parse EQR code: " + err.message);
+                closeReport();
             }
         }
+
+        function closeReport() {
+            document.getElementById("resultContainer").style.display = "none";
+            
+            const wrapper = document.getElementById("scanner-wrapper");
+            const laser = document.getElementById("laser");
+            if(wrapper) wrapper.classList.remove("qr-detected");
+            if(laser) laser.style.display = "block";
+
+            initScanner();
+        }
+
+        function initScanner() {
+            try {
+                if (typeof Html5QrcodeScanner === 'undefined') {
+                    setTimeout(initScanner, 500);
+                    return;
+                }
+                scanner = new Html5QrcodeScanner(
+                    "reader", 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    false
+                );
+                scanner.render(onScanSuccess, onScanFailure);
+            } catch(e) {
+                console.error("Scanner init error:", e);
+            }
+        }
+
+        window.addEventListener('load', initScanner);
     </script>
-</body></html>
+</body>
+</html>

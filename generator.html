@@ -33,7 +33,16 @@
       display: block;
     }
 
-    input[type="text"], input[type="tel"], textarea, button {
+    .row-split {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row-split > div {
+      flex: 1;
+    }
+
+    input[type="text"], input[type="tel"], select, textarea, button {
       display: block;
       width: 100%;
       margin: 6px 0 12px 0;
@@ -44,6 +53,15 @@
       font-family: monospace;
       box-sizing: border-box;
       resize: vertical;
+    }
+
+    select option {
+      background: #222222;
+      color: #ffffff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 1px solid #fbff00;
     }
 
     button {
@@ -95,7 +113,7 @@
       width: 100%;
     }
 
-    /* EXACT 1/4 A4 CARD SIZE (~105mm x 148mm) */
+    /* 1/4 A4 CARD SIZE (~105mm x 148mm) */
     .passport-card {
       width: 105mm;
       height: 148mm;
@@ -197,13 +215,46 @@
     async function generateCompressedQR() {
       var nameVal = document.getElementById("studentName").value.trim();
       var classVal = document.getElementById("studentClass").value.trim();
+      var secVal = document.getElementById("studentSec").value.trim().toUpperCase();
+      var genderVal = document.getElementById("studentGender").value;
+      var bloodVal = document.getElementById("studentBlood").value;
       var phoneVal = document.getElementById("studentPhone").value.trim();
-      var textData = document.getElementById("link").value.trim();
+      var ailmentsVal = document.getElementById("studentAilments").value.trim() || "-";
+      var allergiesVal = document.getElementById("studentAllergies").value.trim() || "-";
+      var medicationVal = document.getElementById("studentMedication").value.trim() || "-";
 
-      if (!textData) {
-        alert("Please enter the student's health paragraph!");
+      // 1. Full Name Validation
+      var nameParts = nameVal.split(/\s+/).filter(Boolean);
+      if (nameParts.length < 2) {
+        alert("Please enter the student's FULL name (First and Last name required).");
         return;
       }
+
+      // 2. Class & Section Validation
+      if (!classVal || !secVal) {
+        alert("Please enter both Class and Section.");
+        return;
+      }
+
+      // 3. Gender & Blood Group Validation
+      if (!genderVal) {
+        alert("Please select a Gender.");
+        return;
+      }
+      if (!bloodVal) {
+        alert("Please select a Blood Group.");
+        return;
+      }
+
+      // 4. 10-Digit Phone Number Validation
+      var phoneDigits = phoneVal.replace(/\D/g, '');
+      if (phoneDigits.length !== 10) {
+        alert("Telephone number MUST be exactly 10 digits!");
+        return;
+      }
+
+      // 5. Build ultra-compact pipe-delimited string payload
+      var rawString = [nameVal, classVal, secVal, genderVal, bloodVal, phoneDigits, ailmentsVal, allergiesVal, medicationVal].join('|');
 
       const progressContainer = document.getElementById("progress-container");
       const progressFill = document.getElementById("progress-fill");
@@ -212,18 +263,18 @@
 
       try {
         progressFill.style.width = "20%";
-        progressText.textContent = "ENCODING DATA... 20%";
-        await new Promise(r => setTimeout(r, 80));
+        progressText.textContent = "PACKING DATA... 20%";
+        await new Promise(r => setTimeout(r, 50));
 
-        // GZIP compression
-        const stream = new Blob([textData]).stream().pipeThrough(new CompressionStream('gzip'));
+        // 6. GZIP Compression Stream
+        const stream = new Blob([rawString]).stream().pipeThrough(new CompressionStream('gzip'));
         const compressedBuffer = await new Response(stream).arrayBuffer();
 
-        progressFill.style.width = "60%";
-        progressText.textContent = "COMPRESSING (GZIP)... 60%";
-        await new Promise(r => setTimeout(r, 80));
+        progressFill.style.width = "50%";
+        progressText.textContent = "GZIP COMPRESSING... 50%";
+        await new Promise(r => setTimeout(r, 50));
 
-        // Base64 string conversion
+        // 7. Convert to Base64
         let binaryString = '';
         const bytes = new Uint8Array(compressedBuffer);
         const len = bytes.byteLength;
@@ -232,24 +283,25 @@
         }
         const base64Compressed = btoa(binaryString);
 
-        progressFill.style.width = "85%";
-        progressText.textContent = "REVERSING PAYLOAD... 85%";
-        await new Promise(r => setTimeout(r, 80));
+        progressFill.style.width = "80%";
+        progressText.textContent = "FLIPPING ENCRYPTION... 80%";
+        await new Promise(r => setTimeout(r, 50));
 
-        // Reverse payload for safety stream
+        // 8. Reverse payload string so cameras don't open it directly
         const flipped = base64Compressed.split('').reverse().join('');
         const finalPayload = "GZIP:" + flipped;
 
-        // Generate QR code API
-        var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(finalPayload);
+        // 9. Generate QR with Low Error Correction (&ecc=L) for chunky, clean blocks
+        var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=L&data=" + encodeURIComponent(finalPayload);
 
         progressFill.style.width = "100%";
         progressText.textContent = "DONE ✓";
 
-        // Populate card
+        // Display on 1/4 A4 Card
+        var combinedClassSec = classVal + " - " + secVal;
         document.getElementById("cardName").textContent = nameVal;
-        document.getElementById("cardClass").textContent = classVal;
-        document.getElementById("cardPhone").textContent = phoneVal;
+        document.getElementById("cardClass").textContent = combinedClassSec;
+        document.getElementById("cardPhone").textContent = phoneDigits;
         document.getElementById("qrImg").src = qrUrl;
 
         document.getElementById("outputSection").style.display = "flex";
@@ -270,22 +322,62 @@
 
     <div style="font-size: 11px; margin-bottom: 12px; line-height: 1.4; color: #fff;">
       Instructions<br>
-      1️⃣. Enter student details & health paragraph<br>
-      2️⃣. Click Submit to encode & generate passport<br>
+      1️⃣. Fill in all student medical details below<br>
+      2️⃣. Click Submit for compressed &amp; flipped EQR<br>
       3️⃣. Print your 1/4 A4 size card
     </div>
 
-    <span class="input-label">Student Name:</span>
-    <input type="text" id="studentName" placeholder="Enter name...">
+    <span class="input-label">Student Full Name:</span>
+    <input type="text" id="studentName" placeholder="First and Last Name (e.g. Rahul Sharma)">
 
-    <span class="input-label">Class and Section:</span>
-    <input type="text" id="studentClass" placeholder="e.g. 10-A">
+    <div class="row-split">
+      <div>
+        <span class="input-label">Class:</span>
+        <input type="text" id="studentClass" placeholder="e.g. 6 / VI">
+      </div>
+      <div>
+        <span class="input-label">Section:</span>
+        <input type="text" id="studentSec" placeholder="e.g. A" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
+      </div>
+    </div>
 
-    <span class="input-label">Telephone Number:</span>
-    <input type="tel" id="studentPhone" placeholder="e.g. +1 555-0192">
+    <div class="row-split">
+      <div>
+        <span class="input-label">Gender:</span>
+        <select id="studentGender">
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <span class="input-label">Blood Group:</span>
+        <select id="studentBlood">
+          <option value="">Select Group</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+        </select>
+      </div>
+    </div>
 
-    <span class="input-label">Health Paragraph:</span>
-    <textarea id="link" rows="4" placeholder="Enter health paragraph..."></textarea>
+    <span class="input-label">Telephone Number (10 digits):</span>
+    <input type="tel" id="studentPhone" maxlength="10" placeholder="e.g. 9876543210" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+    <span class="input-label">Any Ailments:</span>
+    <input type="text" id="studentAilments" placeholder="e.g. Asthma, Diabetes (or leave blank)">
+
+    <span class="input-label">Any Allergies:</span>
+    <input type="text" id="studentAllergies" placeholder="e.g. Peanuts, Dust (or leave blank)">
+
+    <span class="input-label">On Any Medication:</span>
+    <input type="text" id="studentMedication" placeholder="e.g. Inhaler, Insulin (or leave blank)">
 
     <button onclick="generateCompressedQR()">✓ SUBMIT &amp; COMPRESS</button>
 
