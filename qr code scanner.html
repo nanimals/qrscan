@@ -263,6 +263,7 @@
 
     <script>
         let scanner = null;
+        let scanLocked = false;
 
         function playScanBeep() {
             try {
@@ -370,8 +371,27 @@
                     return;
                 }
                 scanner = new Html5QrcodeScanner(
-                    "reader", 
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    "reader",
+                    {
+                        fps: 25,
+                        qrbox: function(viewWidth, viewHeight) {
+                            // Keep the decode region compact for faster processing.
+                            const side = Math.floor(Math.min(viewWidth, viewHeight, 320));
+                            return { width: side, height: side };
+                        },
+                        aspectRatio: 1.0,
+                        disableFlip: true,
+                        rememberLastUsedCamera: true,
+                        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                        experimentalFeatures: {
+                            useBarCodeDetectorIfSupported: true
+                        },
+                        videoConstraints: {
+                            facingMode: "environment",
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    },
                     false
                 );
                 scanner.render(onScanSuccess, onScanFailure);
@@ -402,20 +422,22 @@
       s.style.setProperty('--d',(9+Math.random()*12)+'s');s.style.setProperty('--t',(40+Math.random()*60)+'s');
       s.style.setProperty('--s',(16+Math.random()*22)+'px');s.style.animationDelay=(-Math.random()*20)+'s';f.appendChild(s);}
     /* nebula canvas */
-    var c=document.getElementById('nebula'),x=c.getContext('2d'),w,h,blobs=[],stars=[];
+    var c=document.getElementById('nebula'),x=c.getContext('2d'),w,h,blobs=[],stars=[],lastDraw=0;
     var cols=['255,138,61','251,255,0','70,214,209','40,120,200','255,90,60','120,230,200'];
-    function size(){var dpr=Math.min(devicePixelRatio||1,2);w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr;blobs=[];stars=[];
-      for(var i=0;i<30;i++)blobs.push({x:Math.random()*w,y:Math.random()*h,r:(0.12+Math.random()*0.3)*Math.max(w,h),c:cols[i%cols.length],a:.05+Math.random()*.11,vx:(Math.random()-.5)*.25*dpr,vy:(Math.random()-.5)*.2*dpr,p:Math.random()*6.28,ps:.002+Math.random()*.004});
-      for(var j=0;j<220;j++)stars.push({x:Math.random()*w,y:Math.random()*h,r:(.4+Math.random()*1.6)*dpr,p:Math.random()*6.28,s:.01+Math.random()*.03});}
+    function size(){var dpr=Math.min(devicePixelRatio||1,1.25);w=c.width=Math.floor(innerWidth*dpr);h=c.height=Math.floor(innerHeight*dpr);blobs=[];stars=[];
+      for(var i=0;i<12;i++)blobs.push({x:Math.random()*w,y:Math.random()*h,r:(0.12+Math.random()*0.3)*Math.max(w,h),c:cols[i%cols.length],a:.05+Math.random()*.11,vx:(Math.random()-.5)*.25*dpr,vy:(Math.random()-.5)*.2*dpr,p:Math.random()*6.28,ps:.002+Math.random()*.004});
+      for(var j=0;j<80;j++)stars.push({x:Math.random()*w,y:Math.random()*h,r:(.4+Math.random()*1.6)*dpr,p:Math.random()*6.28,s:.01+Math.random()*.03});}
     size();addEventListener('resize',size);
-    function draw(){x.globalCompositeOperation='source-over';x.fillStyle='#05080f';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';
+    function draw(now){if(document.hidden){requestAnimationFrame(draw);return;}
+      if(now-lastDraw<70){requestAnimationFrame(draw);return;}lastDraw=now;
+      x.globalCompositeOperation='source-over';x.fillStyle='#05080f';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';
       for(var i=0;i<blobs.length;i++){var b=blobs[i];b.p+=b.ps;var r=b.r*(1+Math.sin(b.p)*.08);var g=x.createRadialGradient(b.x,b.y,0,b.x,b.y,r);
         g.addColorStop(0,'rgba('+b.c+','+b.a+')');g.addColorStop(.5,'rgba('+b.c+','+(b.a*.45)+')');g.addColorStop(1,'rgba('+b.c+',0)');
         x.fillStyle=g;x.beginPath();x.arc(b.x,b.y,r,0,6.283);x.fill();
         if(!reduce){b.x+=b.vx;b.y+=b.vy;if(b.x<-r)b.x=w+r;if(b.x>w+r)b.x=-r;if(b.y<-r)b.y=h+r;if(b.y>h+r)b.y=-r;}}
       for(var k=0;k<stars.length;k++){var st=stars[k];st.p+=st.s;x.fillStyle='rgba(255,255,255,'+((.5+Math.sin(st.p)*.5)*.9)+')';x.beginPath();x.arc(st.x,st.y,st.r,0,6.283);x.fill();}
       if(!reduce)requestAnimationFrame(draw);}
-    draw();
+    if(!reduce)requestAnimationFrame(draw);else draw(0);
     /* photo slideshow: bg1.jpg..bg8.jpg next to this file + photos saved in the browser */
     var box=document.getElementById('slides'),urls=[],idx=0,timer=0,db=null;
     try{var rq=indexedDB.open('miku_wallpapers',1);rq.onupgradeneeded=function(e){e.target.result.createObjectStore('bgs',{keyPath:'id',autoIncrement:true});};
