@@ -6,7 +6,8 @@
   <title>Health passport EQR generator</title>
   <style>
     body {
-      background-color: #000000;
+      background: linear-gradient(135deg, #050811 0%, #111625 100%);
+      background-attachment: fixed;
       color: #000000;
       font-family: monospace;
       padding: 20px;
@@ -14,21 +15,24 @@
       flex-direction: column;
       align-items: center;
       margin: 0;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
 
     .window {
-      background: #615353;
-      border: 2px solid #333333;
+      background: #0b1120;
+      border: 2px solid #334155;
       padding: 20px;
       width: 100%;
       max-width: 450px;
       box-sizing: border-box;
       color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .input-label {
       font-size: 12px;
-      color: #fbff00;
+      color: #ff7300;
       margin-top: 10px;
       display: block;
     }
@@ -47,8 +51,8 @@
       width: 100%;
       margin: 6px 0 12px 0;
       padding: 10px;
-      background: #222222;
-      border: 1px solid #444444;
+      background: #1e293b;
+      border: 1px solid #475569;
       color: #ffffff;
       font-family: monospace;
       box-sizing: border-box;
@@ -56,16 +60,16 @@
     }
 
     select option {
-      background: #222222;
+      background: #1e293b;
       color: #ffffff;
     }
 
     input:focus, select:focus, textarea:focus {
-      outline: 1px solid #fbff00;
+      outline: 1px solid #ff7300;
     }
 
     button {
-      background: #fbff00;
+      background: #ff5100;
       color: #000000;
       font-weight: bold;
       cursor: pointer;
@@ -74,7 +78,7 @@
     }
 
     button:hover {
-      background: #e5ff00;
+      background: #f89500;
     }
 
     #progress-container {
@@ -85,8 +89,8 @@
 
     #progress-bar {
       width: 100%;
-      background: #222222;
-      border: 1px solid #444444;
+      background: #1e293b;
+      border: 1px solid #475569;
       height: 14px;
       box-sizing: border-box;
     }
@@ -94,13 +98,13 @@
     #progress-fill {
       width: 0%;
       height: 100%;
-      background: #fbff00;
+      background: #ffa600;
       transition: width 0.05s linear;
     }
 
     #progress-text {
       font-size: 11px;
-      color: #fbff00;
+      color: #fd9800;
       margin-top: 4px;
     }
 
@@ -317,13 +321,13 @@
   <div class="window no-print">
     <h3 style="margin-top:0;">𝙷𝚎𝚊𝚕𝚝𝚑 𝚙𝚊𝚜𝚜𝚙𝚘𝚛𝚝 𝙴𝚀𝚁 𝚐𝚎𝚗𝚎𝚛𝚊𝚝𝚘𝚛</h3>
 
-    <img src="https://media.tenor.com/WblaMue-oPEAAAAm/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF-hatsune-miku.webp" style="width:100px;height:100px;" alt="Miku">
-    <p style="color: #fff; font-size: 13px; margin: 4px 0 12px 0;">codename: miku64</p>
+    <img src="https://static.wikia.nocookie.net/vocalsynth/images/0/07/Adachi_Rei_illust.png" alt="Adachi Rei" style="width:150px;height:200px;">
+    <p style="color: #ff8800; font-size: 13px; margin: 4px 0 12px 0;">codename: Adachi lightweight LTSC</p>
 
     <div style="font-size: 11px; margin-bottom: 12px; line-height: 1.4; color: #fff;">
       Instructions<br>
       1️⃣. Fill in all student medical details below<br>
-      2️⃣. Click Submit for compressed &amp; flipped EQR<br>
+      2️⃣. Click Submit for compressed & flipped EQR<br>
       3️⃣. Print your 1/4 A4 size card
     </div>
 
@@ -379,7 +383,7 @@
     <span class="input-label">On Any Medication:</span>
     <input type="text" id="studentMedication" placeholder="e.g. Inhaler, Insulin (or leave blank)">
 
-    <button onclick="generateCompressedQR()">✓ SUBMIT &amp; COMPRESS</button>
+    <button onclick="generateCompressedQR()">✓ SUBMIT & COMPRESS</button>
 
     <div id="progress-container">
       <div id="progress-bar"><div id="progress-fill"></div></div>
